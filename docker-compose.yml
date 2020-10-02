@@ -1,0 +1,59 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    command: >
+      bash -c "python3 manage.py makemigrations &&
+      python3 manage.py migrate &&
+      python3 manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - secrets.env
+    environment:
+      - "DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}"
+      - "DATABASE_ENGINE=django.db.backends.postgresql"
+      - "DATABASE_DB=django_db"
+      - "DATABASE_HOST=postgres"
+      - "DATABASE_PORT=5432"
+
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  huey:
+    build: .
+    command: >
+      bash -c "python3 manage.py run_huey --logfile huey.log"
+    env_file:
+      - secrets.env
+    environment:
+      - "DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}"
+      - "DATABASE_ENGINE=django.db.backends.postgresql"
+      - "DATABASE_DB=django_db"
+      - "DATABASE_HOST=postgres"
+      - "DATABASE_PORT=5432"
+
+    volumes:
+      - .:/code
+    depends_on:
+      - postgres
+
+  postgres:
+    image: library/postgres:latest
+
+    volumes:
+      - postgres_data:/var/lib/postgres/data
+    ports:
+      - "5432:5432"
+    env_file:
+      - secrets.env
+    environment:
+      - "POSTGRES_DB=django_db"
+
+
+volumes:
+  postgres_data:
+
