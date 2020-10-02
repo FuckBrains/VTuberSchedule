@@ -1,0 +1,9 @@
+Django
+huey
+redis
+requests
+lxml
+selenium
+chromedriver-binary==83.0.4103.39.0
+jsonpath-ng
+psycopg2

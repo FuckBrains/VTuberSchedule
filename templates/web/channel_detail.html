@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+    This is Channel Detail page.
+    {% comment %}
+    TODO 配信予定と配信中をカードで表示
+    TODO 再取得ボタン
+    {% endcomment %}
+    <p>{{ channel.title }}</p>
+    <a href="{% url "api:get_stream" channel.channel_id %}">Reload</a>
+    {% for stream in stream_list %}
+        <p>{{ stream.title }}: {{ stream.start_at }}</p>
+    {% endfor %}
+
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% comment %}
+DONE: 配信中を一番上のRowにカードで表示
+DONE: 配信予定を次のRowにカードで表示
+TODO: 一応、手動更新ボタンも
+TODO: Periodic Taskの状態を取得し切り替えできるように(admin only)
+DONE: Popoverでチャットルームに指定できるように。＋ JSで移動＋DBに登録(admin only)
+DONE: Darkmode
+DONE: 枠取り直しで非公開化された放送を破棄できるように(admin only)
+TODO: メール送信機能
+TODO: 通知機能
+{% endcomment %}
+{% block content %}
+    {% include "web/main.html" %}
+{% endblock %}
+
+{% block auto_reflesh %}
+    <div class="nav-item custom-control custom-switch d-flex align-items-center mr-4">
+        <input type="checkbox" class="custom-control-input" id="switch_auto_refresh">
+        <label for="switch_auto_refresh" class="custom-control-label">自動更新</label>
+    </div>
+    <script>
+    if (typeof auto_reflesh === "undefined") {
+        const auto_reflesh = setInterval(function () {
+            if ($("#switch_auto_refresh").is(":checked")) {
+            refresh('{% url "api:refresh" %}')
+            }
+        }, 60000);
+    }
+</script>
+{% endblock %}

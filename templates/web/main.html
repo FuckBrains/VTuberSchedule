@@ -1,0 +1,70 @@
+<div class="row border border-dark rounded my-2 px-4 py-2" id="live_streams">
+    <h2 class="w-100">-- Now Streaming --</h2>
+    {% for stream in live_list %}
+        <div class="col-md-2 px-0 d-flex align-items-stretch yt-item yt-live" id="live_item_{{ forloop.counter }}">
+            {% include "web/card.html" with s=stream i=forloop.counter j=forloop.parentloop.counter type="live" %}
+        </div>
+    {% endfor %}
+</div>
+
+
+<div class="row border border-dark rounded my-2 px-4 py-2" id="upcoming_streams">
+    <h2 class="w-100">-- Upcoming stream --</h2>
+    {% for d, streams in stream_list %}
+        <div class="row w-100">
+            <h4 class="w-100 ml-2">{{ d }}</h4>
+            {% for stream in streams %}
+                <div class="col-md-2 px-0 d-flex align-items-stretch yt-item yt-upcoming"
+                     id="upcoming_item_{{ forloop.parentloop.counter }}_{{ forloop.counter }}">
+                    {% include "web/card.html" with s=stream i=forloop.parentloop.counter j=forloop.counter type="upcoming" user=user %}
+                </div>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
+
+<div class="row border border-dark rounded my-2 px-4 py-2" id="freechat_streams">
+    <h2 class="w-100">-- Free chat --</h2>
+    {% for stream in freechat_list %}
+        <div class="col-md-2 px-0 d-flex align-items-stretch yt-item yt-freechat"
+             id="freechat_item_{{ forloop.counter }}">
+            {% include "web/card.html" with type="freechat" s=stream i=forloop.counter type="freechat" %}
+        </div>
+    {% endfor %}
+</div>
+
+
+<div class="modal fade remove-confirm-modal" tabindex="-1" role="dialog" aria-labelledby="modalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalLabel">動画を除外</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger mr-auto remove-btn" data-dismiss="modal" onclick="">削除
+                </button>
+                <button type="button" class="btn btn-secondary float-right" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function () {
+        window.addEventListener("load", function () {
+            $('[data-toggle="popover"]').popover(
+                {
+                    trigger: "focus click",
+                    html: true,
+                    offset: "100",
+                    sanitize: false
+                }
+            );
+        });
+    })();
+</script>

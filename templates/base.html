@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <title>TEST</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+          integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="{% static "style.css" %}">
+
+    <script defer src="https://use.fontawesome.com/releases/v5.14.0/js/all.js"
+            integrity="sha384-3Nqiqht3ZZEO8FKj7GR1upiI385J92VwWNLj+FqHxtLYxd9l+WYpeqSOrLh0T12c"
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.6/lib/darkmode-js.min.js"></script>
+</head>
+<body class="d-flex flex-column">
+<div class="container-fluid" id="container">
+    <header class="w-75 mx-auto">
+        <nav class="navbar navbar-expand-lg navbar-light bg-light rounded-bottom py-1">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a href="{% url 'web:index' %}" class="nav-link">Home</a></li>
+            </ul>
+            <ul class="navbar-nav">
+                {% block auto_reflesh %}
+                {% endblock %}
+                <div class="nav-item custom-control custom-switch d-flex align-items-center mr-4">
+                    <input type="checkbox" class="custom-control-input" id="switch_darkmode"
+                           onclick="darkmode.toggle()">
+                    <label for="switch_darkmode" class="custom-control-label">Darkmode</label>
+                </div>
+                {% if user.is_authenticated %}
+                    <li class="nav-item"><a href="{% url 'web:user_detail' %}"
+                                            class="user nav-link">{{ user.username }}</a></li>
+                    <li class="nav-item"><a href="{% url 'logout' %}" class="logout nav-link">Logout</a></li>
+                {% else %}
+                    <li class="nav-item"><a href="{% url 'accounts:signup' %}" class="signup nav-link">Sign up</a></li>
+                    <li class="nav-item"><a href="{% url 'login' %}" class="login nav-link">Login</a></li>
+                {% endif %}
+            </ul>
+        </nav>
+    </header>
+    <div class="content mx-auto my-4">
+        {% block content %}{% endblock %}
+    </div>
+</div>
+<footer class="footer w-100 text-center bg-light">
+    <div class="container h-100 ">
+        <small class="text-muted align-middle">This is footer</small>
+    </div>
+</footer>
+<script src="https://code.jquery.com/jquery-3.3.1.min.js"
+        integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+        crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
+        integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
+        crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
+        crossorigin="anonymous"></script>
+<script src="{% static "js/utils.js" %}"></script>
+
+<script>
+    const darkmode = new Darkmode();
+    if (darkmode.isActivated()) {
+        $("#switch_darkmode").prop("checked", true);
+    } else {
+        $("$switch_darkmode").prop("checked", false);
+    }
+</script>
+</body>
+</html>

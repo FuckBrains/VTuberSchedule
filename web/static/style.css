@@ -1,0 +1,83 @@
+.content {width: 80%}
+.card-body {min-height: 5rem;}
+:focus {outline: none;}
+
+.yt-live .card a img {border-width: 2px!important;}
+
+.del-btn {font-size: .7rem;}
+
+.row .row {
+    margin-right: 0;
+    margin-left: 0;
+}
+
+.content .row {
+    border-radius: .75rem!important;
+}
+
+html, body {height: 100%}
+
+#container {
+    flex: 1 0 auto;
+}
+footer {
+    flex-shrink: unset;
+}
+
+
+/* Darkmode */
+.darkmode--activated .container-fluid {
+    background-color: #d5d5d5;
+}
+.darkmode--activated .navbar {
+    background-color: #4e4e4e!important;
+}
+.darkmode--activated footer {
+    background-color: #4e4e4e!important;
+    isolation: isolate;
+}
+.darkmode--activated .text-muted {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.darkmode--activated .nav-link {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+.darkmode--activated .nav-item label {
+    color: rgba(255, 255, 255, 0.5) !important;
+}
+
+.darkmode--activated .card {
+    background-color: #4e4e4e;
+}
+.darkmode--activated .text-dark {
+    color: #e0e0e0!important;
+}
+.darkmode--activated .text-secondary {
+    color: #c2c2c2!important;
+}
+.darkmode--activated h1 {
+    color: #e0e0e0!important;
+}
+
+/* Border */
+.darkmode--activated .border-danger {
+    border-color: #dc5461 !important;
+}
+.darkmode--activated .card-footer {
+    border-top-color: #b6b6b6 !important;
+}
+.darkmode--activated .border-dark {
+    border-color: #b6b6b6 !important;
+}
+.darkmode--activated th, .darkmode--activated td, .darkmode--activated table {
+    border-color: #b6b6b6 !important;
+}
+
+/* Icon */
+.darkmode--activated .fa-ellipsis-v path {
+    fill: #d5d5d5;
+}
+.darkmode--activated .btn-secondary {
+    background-color: #868686;
+}

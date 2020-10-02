@@ -1,0 +1,28 @@
+<div class="card m-1 px-1 pt-1 pb-0 border-{% if type == "live" %}danger{% else %}dark{% endif %}">
+    <a href="https://www.youtube.com/watch?v={{ s.video_id }}" target="_blank">
+        <img class="bd-placeholder-img card-img-top" src="{{ s.thumb }}" alt="">
+    </a>
+    <div class="card-body p-1 my-1 ">
+        <a href="https://www.youtube.com/watch?v={{ s.video_id }}" target="_blank">
+            <small class="card-text text-dark mb-auto">{{ s.title }}</small>
+        </a>
+    </div>
+    <div class="card-footer py-1 px-2 bg-transparent">
+        {% if user.is_superuser %}
+            <div class="float-left align-middle text-center h-100" style="width: 2rem" tabindex="0" role="button"
+                 data-toggle="popover" data-placement="top"
+                 data-content='<div class="custom-control custom-switch">
+                               <input type="checkbox" {% if s.is_freechat %}checked {% endif %}class = "custom-control-input" id="id_is_{{ type }}_{{ i }}{% if j %}_{{ j }}{% endif %}" onclick="moveToFreechat(this, &#39;#{{ type }}_item_{{ i }}{% if j %}_{{ j }}{% endif %}&#39;, &#39;{% url "api:set_is_freechat" %}&#39;)">
+                               <label for="id_is_{{ type }}_{{ i }}{% if j %}_{{ j }}{% endif %}" class="custom-control-label"><small>チャットルーム</small></label>
+                           </div>
+                           <button type="button" class="btn btn-sm btn-outline-danger py-0 del-btn float-right mb-1" onclick="remove_modal(&#39;.remove-confirm-modal&#39;, &#39;#{{ type }}_item_
+
+
+                         {{ i }}{% if j %}_{{ j }}{% endif %}&#39;, &#39;{% url "api:remove_stream" %}&#39;)">削除</button>'>
+                <i class="fas fa-lg fa-ellipsis-v h-100 mx-auto"></i>
+            </div>
+        {% endif %}
+        <a class="btn-sm btn-{% if type == "live" %}danger{% else %}secondary{% endif %} float-right"
+           href="https://www.youtube.com/channel/{{ s.channel.channel_id }}" target="_blank">Channel</a>
+    </div>
+</div>

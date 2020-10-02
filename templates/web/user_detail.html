@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+    <!--
+        <p>
+        This is User page.
+        Features =>
+        Show Channel ID of the user
+        Subbed Channel List
+        Rescan Subbed Channels
+        </p> -->
+    <div class="align-content-center">
+        <div class="row w-75 mx-auto mt-4">
+            <div class="col-sm-8">
+                <h1>{{ user.nickname }}</h1>
+                <p>{{ user.channel_id }}</p>
+                {% if user.is_superuser %}
+                    <p>Super User</p>
+                {% endif %}
+                <a class="btn btn-outline-primary" href="{% url "web:user_update" %}">Change</a>
+                <script src="{% static "js/get_subscription.js" %}"></script>
+                <button class="btn btn-outline-primary" id="reload" onclick="getSubscription('{% url "api:get_subscription" %}'); this.disabled = true;">Reload</button>
+            </div>
+            <div class="col-sm-4">
+                <img src="https://yt3.ggpht.com/a-/AOh14Gi-SFXItsu3cM_bETcrMrJWZsJQAObrFUD2AHod=s100-c-k-c0xffffffff-no-rj-mo" alt="">
+            </div>
+        </div>
+        <div class="row w-75 mx-auto mt-4">
+            <table class="table table-hover border">
+                <thead>
+                <tr>
+                    <th scope="col">#</th>
+                    <th scope="col">チャンネル名</th>
+                    <th scope="col">URL</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for c in user.channel.all %}
+                    <tr>
+                        <th scope="row">{{ forloop.counter }}</th>
+                        <td><a href="{% url "web:channel_detail" c.channel_id %}">{{ c.title }}</a></td>
+                        <td><a href="https://www.youtube.com/channel/{{ c.channel_id }}" class="golink" target="_blank">Link</a>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
