@@ -10,16 +10,19 @@ services:
     env_file:
       - secrets.env
     environment:
-      - "DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}"
+      - "DJANGO_SECRET_KEY"
       - "DATABASE_ENGINE=django.db.backends.postgresql"
       - "DATABASE_DB=django_db"
       - "DATABASE_HOST=postgres"
-      - "DATABASE_PORT=5432"
+      - "VIRTUAL_HOST=youtube.dplab.biz"
+      - "VIRTUAL_PORT=8000"
 
     volumes:
       - .:/code
     ports:
       - "8000:8000"
+    expose:
+      - 8000
     depends_on:
       - postgres
 
@@ -30,7 +33,7 @@ services:
     env_file:
       - secrets.env
     environment:
-      - "DJANGO_SECRET_KEY=${DJANGO_SECRET_KEY}"
+      - "DJANGO_SECRET_KEY"
       - "DATABASE_ENGINE=django.db.backends.postgresql"
       - "DATABASE_DB=django_db"
       - "DATABASE_HOST=postgres"
@@ -57,3 +60,7 @@ services:
 volumes:
   postgres_data:
 
+networks:
+  default:
+    external:
+      name: projects_default
