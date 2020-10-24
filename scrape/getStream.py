@@ -59,9 +59,9 @@ def get_upcoming_streams(_channel_id):
         video_list[item["id"]]["title"] = item["snippet"]["title"]
         if _is_freechat(video_list[item["id"]]["title"]):
             video_list[item["id"]]["is_freechat"] = True
-        elif Stream.objects.filter(video_id=[item["id"]]) and \
-                Stream.objects.filter(video_id=[item["id"]])[0].is_freechat:
-            video_list[item["id"]]["is_freechat"] = True
+        elif Stream.objects.filter(video_id=[item["id"]]).exists():
+            if Stream.objects.get(video_id=[item["id"]])[0].is_freechat:
+                video_list[item["id"]]["is_freechat"] = True
         else:
             video_list[item["id"]]["is_freechat"] = False
 
@@ -170,7 +170,6 @@ def _get_streaming_videos(_channel_id):
             videos_json = parse("$..gridVideoRenderer").find(data)
             # print(videos_json[0].value)
 
-
             videos = {}
             for video in videos_json:
                 try:
@@ -194,7 +193,6 @@ def _get_streaming_videos(_channel_id):
                     thumb = 'https://i.ytimg.com/vi/%s/mqdefault.jpg' % video_id
 
                     videos[video_id] = {"title": title, "thumb": thumb}
-
 
             return videos
 
