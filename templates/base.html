@@ -8,7 +8,7 @@
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
     <link rel="stylesheet" href="{% static "style.css" %}">
-
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <script defer src="https://use.fontawesome.com/releases/v5.14.0/js/all.js"
             integrity="sha384-3Nqiqht3ZZEO8FKj7GR1upiI385J92VwWNLj+FqHxtLYxd9l+WYpeqSOrLh0T12c"
             crossorigin="anonymous"></script>
@@ -65,7 +65,7 @@
     if (darkmode.isActivated()) {
         $("#switch_darkmode").prop("checked", true);
     } else {
-        $("$switch_darkmode").prop("checked", false);
+        $("#switch_darkmode").prop("checked", false);
     }
 </script>
 </body>
