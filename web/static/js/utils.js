@@ -49,7 +49,7 @@ function remove_modal(modal_selector, target_selector, api_url) {
     const target = $(target_selector);
     const video_id = target.find("a").attr("href").replace("https://www.youtube.com/watch?v=", "");
 
-    // Footer削除しModalに表示
+    // Footer削除しCardをModalに表示
     const fixed = target.children().clone(true);
     fixed.find(".card-footer").remove();
     $(modal_selector).find(".modal-body").html(
@@ -61,6 +61,15 @@ function remove_modal(modal_selector, target_selector, api_url) {
     const url = api_url + "?v=" + video_id;
     remove_btn.attr("onclick", `remove_stream('${url}', '${target_selector}')`);
 
+}
+function notify_modal(modal, api_url ,video_id) {
+    modal.modal();
+    modal.find(".modal-body").html("<div class='text-center'><i class=\"fas fa-spinner fa-pulse text-center mx-auto\"></i></div>")
+
+
+    $.get(api_url, {videoId: video_id},function(res) {
+        modal.find(".modal-body").html(res)
+    })
 }
 
 function remove_stream(url, target_selector) {

@@ -1,6 +1,7 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_GET
 from django.template.loader import render_to_string
 
 from accounts.models import CustomUser
@@ -15,10 +16,10 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 
+@require_GET
 @login_required
-def get_stream(request, channel_id):
-    if request.method != "GET":
-        return HttpResponseBadRequest
+def get_streams(request):
+    channel_id = request.GET.get("channelId")
 
     error, stream_list = get_upcoming_streams(channel_id)
     if error:
@@ -26,17 +27,27 @@ def get_stream(request, channel_id):
     return JsonResponse({"error": False, "data": stream_list})
 
 
+@require_GET
+@login_required
+def get_stream_data(request):
+    video_id = request.GET.get("videoId")
+    try:
+        v = Stream.objects.get(video_id=video_id)
+    except Stream.DoesNotExist:
+        return HttpResponseBadRequest
+    return HttpResponse(render_to_string("web/notify_modal_body.html", {"stream": v}))
+
+
+@require_GET
 @login_required
 def get_live(request, channel_id):
-    if request.method != "GET":
-        return HttpResponseBadRequest
-
     error, stream_list = get_streaming_videos(channel_id)
     if error:
         return JsonResponse({"error": error, "code": stream_list[0], "message": stream_list[1]})
     return JsonResponse({"error": False, "data": stream_list})
 
 
+@require_GET
 @login_required
 def get_sub_channel(request):
     if request.method != "GET":
@@ -49,9 +60,10 @@ def get_sub_channel(request):
     return JsonResponse({"error": False})
 
 
+@require_GET
 @login_required
 def set_is_freechat(request):
-    if request.method != "GET" or not request.user.is_superuser:
+    if not request.user.is_superuser:
         return JsonResponse({"error": True, "code": "INVALID_REQUEST", "message": "No permission or invalid method"})
     if "v" in request.GET:
         video_id = request.GET["v"]
@@ -75,9 +87,10 @@ def set_is_freechat(request):
     return JsonResponse({"error": False})
 
 
+@require_GET
 @login_required
 def remove_stream(request):
-    if request.method != "GET" or not request.user.is_superuser:
+    if not request.user.is_superuser:
         return HttpResponseBadRequest
     if "v" in request.GET:
         video_id = request.GET["v"]
@@ -91,11 +104,9 @@ def remove_stream(request):
     return JsonResponse({"error": False})
 
 
+@require_GET
 @login_required
 def refresh(request):
-    if request.method != "GET":
-        return HttpResponseBadRequest
-
     user = get_object_or_404(CustomUser, username=request.user.username)
     live_list, upc_list, freechat_list = get_streams(user)
 
