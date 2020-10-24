@@ -7,8 +7,16 @@
     {% endcomment %}
     <p>{{ channel.title }}</p>
     <a href="{% url "api:get_stream" channel.channel_id %}">Reload</a>
-    {% for stream in stream_list %}
-        <p>{{ stream.title }}: {{ stream.start_at }}</p>
-    {% endfor %}
+    <div class="row border border-dark rounded my-2 px-4 py-2" id="upcoming_streams">
+    <h2 class="w-100">-- Stream List --</h2>
+    <div class="row w-100">
+        {% for stream in stream_list %}
+            <div class="col-md-2 px-0 d-flex align-items-stretch yt-item yt-upcoming"
+                 id="upcoming_item_{{ forloop.counter }}">
+                {% include "web/card.html" with s=stream i=forloop.counterr type="upcoming" user=user %}
+            </div>
+        {% endfor %}
+    </div>
+</div>
 
 {% endblock %}
