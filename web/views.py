@@ -48,7 +48,7 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
 
 def channel_detail(request, channel_id):
     channel = get_object_or_404(Channel, channel_id=channel_id)
-    stream_list = channel.stream.all().filter(start_at__gte=timezone.now())
+    stream_list = channel.stream.filter(channel_id=channel_id).order_by("start_at")[:50]
     return render(request, "web/channel_detail.html", {"channel": channel, "stream_list": stream_list})
 
 
