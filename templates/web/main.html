@@ -1,7 +1,8 @@
 <div class="row border border-dark rounded my-2 px-4 py-2" id="live_streams">
     <h2 class="w-100">-- Now Streaming --</h2>
     {% for stream in live_list %}
-        <div class="col-md-2 px-0 d-flex align-items-stretch yt-item yt-live" id="live_item_{{ forloop.counter }}">
+        <div class="col-lg-2 px-0 d-flex align-items-stretch yt-item yt-live" style="max-width: 16rem;min-width: 10rem;"
+             id="live_item_{{ forloop.counter }}">
             {% include "web/card.html" with s=stream i=forloop.counter j=forloop.parentloop.counter type="live" %}
         </div>
     {% endfor %}
@@ -14,7 +15,7 @@
         <div class="row w-100">
             <h4 class="w-100 ml-2">{{ d }}</h4>
             {% for stream in streams %}
-                <div class="col-md-2 px-0 d-flex align-items-stretch yt-item yt-upcoming"
+                <div class="col-xl-2 px-0 d-flex align-items-stretch yt-item yt-upcoming" style="max-width: 16rem"
                      id="upcoming_item_{{ forloop.parentloop.counter }}_{{ forloop.counter }}">
                     {% include "web/card.html" with s=stream i=forloop.parentloop.counter j=forloop.counter type="upcoming" user=user %}
                 </div>
@@ -26,7 +27,7 @@
 <div class="row border border-dark rounded my-2 px-4 py-2" id="freechat_streams">
     <h2 class="w-100">-- Free chat --</h2>
     {% for stream in freechat_list %}
-        <div class="col-md-2 px-0 d-flex align-items-stretch yt-item yt-freechat"
+        <div class="col-xl-2 px-0 d-flex align-items-stretch yt-item yt-freechat" style="max-width: 16rem"
              id="freechat_item_{{ forloop.counter }}">
             {% include "web/card.html" with type="freechat" s=stream i=forloop.counter type="freechat" %}
         </div>
@@ -59,7 +60,7 @@
         window.addEventListener("load", function () {
             $('[data-toggle="popover"]').popover(
                 {
-                    trigger: "focus click",
+                    trigger: "focus",
                     html: true,
                     offset: "100",
                     sanitize: false
