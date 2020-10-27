@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     "api",
     "web",
     "accounts",
-    "scrape"
+    "scrape",
+    "notify"
 ]
 
 MIDDLEWARE = [
