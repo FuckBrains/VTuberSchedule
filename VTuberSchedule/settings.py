@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "huey.contrib.djhuey",
+    "widget_tweaks",
     "api",
     "web",
     "accounts",
