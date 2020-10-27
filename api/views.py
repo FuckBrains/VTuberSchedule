@@ -18,7 +18,7 @@ logger = getLogger(__name__)
 
 @require_GET
 @login_required
-def get_streams(request):
+def get_stream_list(request):
     channel_id = request.GET.get("channelId")
 
     error, stream_list = get_upcoming_streams(channel_id)
@@ -76,7 +76,6 @@ def set_is_freechat(request):
     else:
         return JsonResponse({"error": True, "code": "NO_TO", "message": "No data to set in GET params. &to=0 or 1"})
 
-    # Process
     stream = get_object_or_404(Stream, video_id=video_id)
     if stream.is_freechat == set_to:
         return JsonResponse({"error": True, "code": "INVALID_PARAM", "message": "Current status == param to set."})
@@ -97,7 +96,6 @@ def remove_stream(request):
     else:
         return JsonResponse({"error": True, "code": "NO_V", "message": "No video id in GET params. &v=video_id"})
 
-    # Process
     stream = get_object_or_404(Stream, video_id=video_id)
     stream.is_removed = True
     stream.save()
