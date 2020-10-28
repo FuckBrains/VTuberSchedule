@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load static %}
+{% block content %}
+    <div class="container">
+        <div class="head-image text-center">
+            <img class="w-75" src="{% static 'images/YoutubeLiveSchedulerHeader.jpg' %}" alt="">
+        </div>
+        <div class="text-center mt-3 w-50 mx-auto border-top border-bottom border-dark p-2">
+            <a href="{% url 'accounts:signup' %}" class="btn btn-info mx-2">新規登録</a>
+            <a href="{% url 'login' %}" class="btn btn-info mx-2">ログイン</a>
+        </div>
+        <div class="text-center">
+            <p>
+                Youtube Live 管理サイト<br>
+                見づらい公式の生放送一覧画面に代わり、放送予定の動画を表示します。
+            </p>
+        </div>
+    </div>
+{% endblock %}
