@@ -10,11 +10,11 @@ from scrape.getChannel import get_subbed_channel
 
 class CustomForm(UserCreationForm):
     channel_id = CharField(required=True,
-                           label="Channel ID",
-                           error_messages={"invalid": "Invalid ID",
-                                           "exist": "Already exist ID"})
-    nickname = CharField(required=True, max_length=12, label="Nickname")
-    email = CharField(required=False, max_length=254, label="eMail address to remind")
+                           label="チャンネルID",
+                           error_messages={"invalid": "不正なIDです。",
+                                           "exist": "既に存在します。"})
+    nickname = CharField(required=True, max_length=12, label="ニックネーム")
+    email = CharField(required=False, max_length=254, label="メールアドレス")
 
     class Meta:
         model = CustomUser
