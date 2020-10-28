@@ -1,12 +1,44 @@
 {% extends 'base.html' %}
+{% load widget_tweaks %}
 
 {% block content %}
-<h1>Sign up</h1>
-<section class="common-form">
-    <form method="post">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="submit">Sign up</button>
-    </form>
-</section>
+    <div class="container">
+        <div class="header"><h3 class="text-center">新規登録</h3></div>
+        <section class="common-form w-50 mx-auto">
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="{{ form.username.id_for_label }}"
+                           class="col-form-label col-form-label-sm py-0">{{ form.username.label }}</label>
+                    {{ form.username|add_class:"form-control form-control-sm" }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.channel_id.id_for_label }}"
+                           class="col-form-label col-form-label-sm py-0">{{ form.channel_id.label }}</label>
+                    {{ form.channel_id|add_class:"form-control form-control-sm" }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.nickname.id_for_label }}"
+                           class="col-form-label col-form-label-sm py-0">{{ form.nickname.label }}</label>
+                    {{ form.nickname|add_class:"form-control form-control-sm" }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.email.id_for_label }}"
+                           class="col-form-label col-form-label-sm py-0">{{ form.email.label }}</label>
+                    {{ form.email|add_class:"form-control form-control-sm" }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.password1.id_for_label }}"
+                           class="col-form-label col-form-label-sm py-0">{{ form.password1.label }}</label>
+                    {{ form.password1|add_class:"form-control form-control-sm" }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.password2.id_for_label }}"
+                           class="col-form-label col-form-label-sm py-0">{{ form.password2.label }}</label>
+                    {{ form.password2|add_class:"form-control form-control-sm" }}
+                </div>
+                <button type="submit" class="btn btn-info mt-2">Sign up</button>
+            </form>
+        </section>
+    </div>
 {% endblock %}

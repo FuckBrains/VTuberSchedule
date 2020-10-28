@@ -3,7 +3,7 @@
 <html lang="ja">
 <head>
     <meta charset="utf-8">
-    <title>TEST</title>
+    <title>Youtube Live Scheduler</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
           integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 
@@ -19,7 +19,8 @@
     <header class="w-75 mx-auto">
         <nav class="navbar navbar-expand-lg navbar-light bg-light rounded-bottom py-1">
             <ul class="navbar-nav mr-auto">
-                <li class="nav-item"><a href="{% url 'web:index' %}" class="nav-link">Home</a></li>
+                <li class="nav-item"><a href="/" class="nav-link"><img src="{% static 'images/YoutubeLiveSchedulerLogo.svg' %}" alt="" style="height: 2rem;"></a></li>
+                <li class="nav-item my-auto"><a href="/" class="nav-link">Home</a></li>
             </ul>
             <ul class="navbar-nav">
                 {% block auto_reflesh %}
@@ -46,7 +47,7 @@
 </div>
 <footer class="footer w-100 text-center bg-light">
     <div class="container h-100 ">
-        <small class="text-muted align-middle">This is footer</small>
+        <small class="text-muted align-middle">Created by KK - 2020</small>
     </div>
 </footer>
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"

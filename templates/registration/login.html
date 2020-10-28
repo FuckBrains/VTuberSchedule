@@ -1,34 +1,36 @@
 {% extends "base.html" %}
+{% load widget_tweaks %}
 
 {% block content %}
+    <div class="container w-25">
+        {% if form.errors %}
+            <p>Your username and password didn't match. Please try again.</p>
+        {% endif %}
 
-{% if form.errors %}
-<p>Your username and password didn't match. Please try again.</p>
-{% endif %}
+        {% if next %}
+            {% if user.is_authenticated %}
+                <p>権限のあるユーザーのみアクセス可能です。 アクセスするためには別のアカウントでログインしてください。</p>
+            {% else %}
+                <p>このページを表示するためにログインしてください。</p>
+            {% endif %}
+        {% endif %}
 
-{% if next %}
-    {% if user.is_authenticated %}
-    <p>Your account doesn't have access to this page. To proceed,
-    please login with an account that has access.</p>
-    {% else %}
-    <p>Please login to see this page.</p>
-    {% endif %}
-{% endif %}
-
-<form method="post" action="{% url 'login' %}">
-{% csrf_token %}
-<table>
-<tr>
-    <td>ユーザー名: </td>
-    <td>{{ form.username }}</td>
-</tr>
-<tr>
-    <td>パスワード: </td>
-    <td>{{ form.password }}</td>
-</tr>
-</table>
-
-<input type="submit" value="login" />
-<input type="hidden" name="next" value="{{ next }}" />
-</form>
+        <form method="post" action="{% url 'login' %}">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}"
+                       class="col-form-label col-form-label-sm py-0">{{ form.username.label }}</label>
+                {{ form.username|add_class:"form-control form-control-sm" }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}"
+                       class="col-form-label col-form-label-sm py-0">{{ form.password.label }}</label>
+                {{ form.password|add_class:"form-control form-control-sm" }}
+            </div>
+            <div class="text-center mt-4">
+                <input class="btn btn-info" type="submit" value="ログイン"/>
+            </div>
+            <input type="hidden" name="next" value="{{ next }}"/>
+        </form>
+    </div>
 {% endblock %}
