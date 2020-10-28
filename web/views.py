@@ -18,7 +18,7 @@ from web.utils import get_streams
 
 def index(request):
     if not request.user.is_authenticated:
-        return redirect("login")
+        return render(request, "web/top.html")
 
     user = get_object_or_404(CustomUser, username=request.user.username)
 

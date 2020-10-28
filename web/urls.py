@@ -8,6 +8,7 @@ urlpatterns = [
     path("user/update", login_required(views.UserUpdateView.as_view()), name="user_update"),
     path("channel/<slug:channel_id>", views.channel_detail, name="channel_detail"),
     path("test", views.test, name="test"),
+    path("top", views.index, name="top"),
     path("", views.index, name="index"),
 
 ]
