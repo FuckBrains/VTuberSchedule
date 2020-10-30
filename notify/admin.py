@@ -1,3 +1,5 @@
 from django.contrib import admin
+from .models import NoticeScheduleChannel, NoticeScheduleStream
 
-# Register your models here.
+admin.site.register(NoticeScheduleStream)
+admin.site.register(NoticeScheduleChannel)

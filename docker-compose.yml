@@ -16,6 +16,7 @@ services:
       - "DATABASE_HOST=postgres"
       - "VIRTUAL_HOST=youtube.dplab.biz"
       - "VIRTUAL_PORT=8000"
+      - "DJANGO_DEBUG=False"
 
     volumes:
       - .:/code
