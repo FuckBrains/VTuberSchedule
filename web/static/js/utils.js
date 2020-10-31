@@ -104,6 +104,7 @@ function initPopover() {
 
 function refresh(url) {
     $("[data-toggle='popover']").each(function(i, ele){$(ele).popover("dispose")})
+    $(".modal").modal("hide")
     const xhr = new XMLHttpRequest();
     xhr.open("GET", url, true);
     xhr.onload = function () {
