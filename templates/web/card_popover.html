@@ -6,15 +6,15 @@
     <label for="id_is_{{ type }}_{{ i }}{% if j %}_{{ j }}{% endif %}"
            class="custom-control-label"><small>チャットルーム</small></label>
 </div>
-    <div>
-<button type="button" class="btn btn-sm btn-outline-danger py-0 del-btn float-right mb-1"
-        onclick="remove_modal(`.remove-confirm-modal`, `#{{ type }}_item_{{ i }}{% if j %}_{{ j }}{% endif %}`, `{% url 'api:remove_stream' %}`)">削除
-</button>
-    </div>
+<div>
+    <button type="button" class="popover-btn btn btn-sm btn-outline-danger py-0 float-right mb-1"
+            onclick="remove_modal(`.remove-confirm-modal`, `#{{ type }}_item_{{ i }}{% if j %}_{{ j }}{% endif %}`, `{% url 'api:remove_stream' %}`)">削除
+    </button>
+</div>
 {% endif %}
 <div>
-    <button type="button" class="notify-btn btn btn-sm btn-outline-info py-0 float-right mb-1"
-        onclick="notify_modal($(`.notify-setting-modal`), `{% url 'api:get_stream_data' %}`,`{{ s.video_id }}`)">通知
+    <button type="button" class="popover-btn btn btn-sm btn-outline-info py-0 float-right mb-1"
+        onclick="notify_modal($(`.notify-setting-modal`), `{% url 'api:get_notify_modal' %}`,`{{ s.video_id }}`)">通知
     </button>
 </div>
 <div>

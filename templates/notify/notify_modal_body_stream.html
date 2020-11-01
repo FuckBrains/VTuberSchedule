@@ -1,0 +1,50 @@
+{% load widget_tweaks %}
+<input type="hidden" value="{{ stream.video_id }}" name="target_id">
+<div class="form-group">
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label for="type_stream" class="btn btn-sm btn-outline-dark">
+            <input id="type_stream" type="radio" name="target_type" value="stream" checked>
+            Stream
+        </label>
+        <label for="type_channel" class="btn btn-sm btn-outline-dark">
+            <input id="type_channel" type="radio" name="target_type" value="channel">
+            Channel
+        </label>
+    </div>
+</div>
+<div class="pb-4 px-2 video_image">
+    <img src="{{ stream.thumb }}" alt="" class="w-100">
+</div>
+<div class="form-group">
+    <div class="input-group input-group-sm">
+        {{ forms.notice_min|add_class:"form-control form-control-sm"|append_attr:"aria-describedby=min_addon"|append_attr:"required" }}
+        <div class="input-group-append">
+            <small class="input-group-text" id="min_addon">分前に通知</small>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label for="action_add" class="btn btn-sm btn-outline-dark">
+            <input id="action_add" type="radio" name="action" value="add" checked>
+            有効
+        </label>
+        <label for="action_remove" class="btn btn-sm btn-outline-dark">
+            <input id="action_remove" type="radio" name="action" value="remove">
+            無効
+        </label>
+    </div>
+</div>
+<script>
+    var data = {is_active_stream: {{ data.is_active_stream }}, is_active_channel: {{ data.is_active_channel }}}
+    var image = $(".video_image")
+    $("input[name='target_type']").on("change", (ev)=>{
+        if (ev.target.value === "channel"){
+            image.hide()
+            $("input[name='target_id']").val("{{ channel.channel_id }}")
+        } else if (ev.target.value === "stream"){
+            image.show()
+            $("input[name='target_id']").val("{{ stream.video_id }}")
+        }
+    })
+</script>

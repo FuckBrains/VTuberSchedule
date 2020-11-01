@@ -1,0 +1,4 @@
+{% if user.is_authenticated or group %}
+  {% load static %}
+  <script id="webpush-js" type="text/javascript" src="{% static 'js/webpush.js' %}"></script>
+{% endif %}

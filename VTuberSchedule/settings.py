@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "huey.contrib.djhuey",
     "widget_tweaks",
+    "webpush",
     "api",
     "web",
     "accounts",
@@ -110,6 +111,12 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+WEBPUSH_SETTINGS = {
+   "VAPID_PUBLIC_KEY": os.environ.get("VAPID_PUBLIC"),
+   "VAPID_PRIVATE_KEY": os.environ.get("VAPID_PRIVATE"),
+   "VAPID_ADMIN_EMAIL": os.environ.get("VAPID_MAIL")
+}
+
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
@@ -135,22 +142,22 @@ AUTH_USER_MODEL = "accounts.CustomUser"
 YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY")
 
 # Logging
-if DEBUG:
-    # will output to your console
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format='%(asctime)s %(levelname)s %(message)s',
-    )
-    logging.getLogger("requests").setLevel(logging.WARNING)
-    logging.getLogger("huey").setLevel(logging.INFO)
-else:
-    # will output to logging file
-    logging.basicConfig(
-        level=logging.INFO,
-        format='%(asctime)s %(levelname)s %(message)s',
-        filename='/my_log_file.log',
-        filemode='a'
-    )
+# if DEBUG:
+#     # will output to your console
+#     logging.basicConfig(
+#         level=logging.DEBUG,
+#         format='%(asctime)s %(levelname)s %(message)s',
+#     )
+#     logging.getLogger("requests").setLevel(logging.WARNING)
+#     logging.getLogger("huey").setLevel(logging.INFO)
+# else:
+#     # will output to logging file
+#     logging.basicConfig(
+#         level=logging.INFO,
+#         format='%(asctime)s %(levelname)s %(message)s',
+#         filename='/my_log_file.log',
+#         filemode='a'
+#     )
 
 # Huey
 HUEY = {
@@ -162,3 +169,6 @@ HUEY = {
         "workers": 3,
     }
 }
+
+SENDGRID_API = os.environ.get("SENDGRID_API")
+MAIL_ADDR = os.environ.get("SENDGRID_MAIL")

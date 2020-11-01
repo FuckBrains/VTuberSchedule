@@ -1,0 +1,31 @@
+{% load widget_tweaks %}
+<div class="w-50 mx-auto" style="min-width: 15rem">
+    <form method="get" action="{% url "api:notify" %}">
+        {#        <div class="form-group">#}
+        {#            {% if not stream_cond_list %}#}
+        {#                <li>登録されているライブ放送はありません。</li>#}
+        {#            {% endif %}#}
+        {#            {% for stream_cond in stream_cond_list %}#}
+        {#                <div class="custom-control custom-checkbox">#}
+        {#                    <input type="checkbox" class="custom-control-input" id="input_{{ stream_cond.stream.video_id }}"#}
+        {#                           {% if user in stream_cond.users.all %}checked{% endif %}>#}
+        {#                    <label for="input_{{ stream_cond.stream.video_id }}"#}
+        {#                           class="custom-control-label">{{ stream_cond.stream.title }}</label>#}
+        {#                </div>#}
+        {#            {% endfor %}#}
+        {#        </div>#}
+        {% if type == "stream" %}
+            {% include "notify/notify_modal_body_stream.html" %}
+        {% elif type == "channel" %}
+            {% include "notify/notify_modal_body_channel.html" %}
+        {% endif %}
+        <div class="form-group">
+            <button type="button" class="btn btn-danger mr-auto remove-btn" data-dismiss="modal"
+                    onclick="send_notify_settings($('form'), '{% url 'api:notify' %}')">確定
+            </button>
+        </div>
+        <script>
+            $("input:checked").parent().addClass("active")
+        </script>
+    </form>
+</div>

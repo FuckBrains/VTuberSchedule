@@ -21,5 +21,6 @@ urlpatterns = [
     path("account/", include("accounts.urls", namespace="accounts")),
     path("account/", include("django.contrib.auth.urls")),
     path("api/", include("api.urls", namespace="api")),
+    path("webpush/", include("webpush.urls")),
     path("", include("web.urls", namespace="web"))
 ]

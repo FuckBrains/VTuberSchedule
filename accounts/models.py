@@ -8,3 +8,4 @@ class CustomUser(AbstractUser):
     channel_id = models.CharField(max_length=24, unique=True)
     channel = models.ManyToManyField(Channel, related_name="user")
     nickname = models.CharField(max_length=12)
+    timezone = models.TextField(max_length=32, default="Asia/Tokyo")

@@ -8,3 +8,5 @@ chromedriver-binary==83.0.4103.39.0
 jsonpath-ng
 psycopg2
 django-widget-tweaks
+sendgrid
+django-webpush

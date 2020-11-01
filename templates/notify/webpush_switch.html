@@ -1,0 +1,9 @@
+{% if user.is_authenticated or group %}
+    <div class="nav-item custom-control custom-switch d-flex align-items-center mr-4">
+        <input type="checkbox" class="custom-control-input" id="webpush-subscribe-switch"
+               {% if group %}data-group="{{ group }}"{% endif %} {% if class %}class="{{ class }}"{% endif %}
+               data-url="{{ webpush_save_url }}">
+        <label for="webpush-subscribe-switch" class="custom-control-label">Web通知</label>
+    </div>
+    <div id="webpush-message" hidden></div>
+{% endif %}

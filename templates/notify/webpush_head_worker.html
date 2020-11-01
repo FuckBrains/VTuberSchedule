@@ -1,0 +1,4 @@
+{% if user.is_authenticated or group %}
+  {% load static %}
+  <meta name="service-worker-js" content="{% url 'service_worker' %}">
+{% endif %}

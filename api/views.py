@@ -6,10 +6,14 @@ from django.template.loader import render_to_string
 
 from accounts.models import CustomUser
 from web.models import Channel, Stream
+from notify.models import NoticeScheduleStream, NoticeScheduleChannel
+from notify.forms import NoticeForm
 
 from scrape.getChannel import get_subbed_channel
 from scrape.getStream import get_upcoming_streams, get_streaming_videos
 from web.utils import get_streams
+
+import json
 
 from logging import getLogger
 
@@ -29,13 +33,46 @@ def get_stream_list(request):
 
 @require_GET
 @login_required
-def get_stream_data(request):
+def get_notify_modal(request):
     video_id = request.GET.get("videoId")
-    try:
-        v = Stream.objects.get(video_id=video_id)
-    except Stream.DoesNotExist:
+    channel_id = request.GET.get("channelId")
+    forms = NoticeForm(data={"notice_min": 5})
+    user = CustomUser.objects.get(username=request.user.username)
+    # stream_cond_list = user.notice_schedule_streams.all()
+
+    if video_id:
+        try:
+            v = Stream.objects.get(video_id=video_id)
+        except Stream.DoesNotExist:
+            return HttpResponseBadRequest
+        stream_cond_list = v.notice_schedule_stream.filter(is_active=True)
+
+        return HttpResponse(render_to_string("notify/notify_modal_body.html", {
+            "type": "stream",
+            "forms": forms,
+            "user": user,
+            "stream": v,
+            "channel": v.channel,
+            "active_conditions": stream_cond_list,
+            "data": {"is_active_stream": [x.notice_min for x in stream_cond_list],
+                     "is_active_channel": [x.notice_min for x in v.channel.notice_schedule_channel.all()]}
+        }))
+    elif channel_id:
+        try:
+            c = Channel.objects.get(channel_id=channel_id)
+        except Channel.DoesNotExist:
+            return HttpResponseBadRequest
+
+        return HttpResponse(render_to_string("notify/notify_modal_body.html", {
+            "type": "channel",
+            "forms": forms,
+            "user": user,
+            "channel": c,
+            "active_conditions": c.notice_schedule_channel.all(),
+            "data": {"is_active_channel": [x.notice_min for x in c.notice_schedule_channel.all()]}
+        }))
+    else:
         return HttpResponseBadRequest
-    return HttpResponse(render_to_string("web/notify_modal_body.html", {"stream": v}))
 
 
 @require_GET
@@ -110,3 +147,34 @@ def refresh(request):
 
     return HttpResponse(render_to_string("web/main.html", {"live_list": live_list, "stream_list": upc_list,
                                                            "freechat_list": freechat_list, "user": request.user}))
+
+
+@require_GET
+@login_required
+def notify(request):
+    form = NoticeForm(request.GET)
+    if not form.is_valid():
+        return JsonResponse({"status": False, "errors": form.errors, "msg": "form error"})
+
+    target_type = form.cleaned_data.get("target_type")
+    action = form.cleaned_data.get("action")
+    target = form.cleaned_data.get("target_id")
+    notice_min = form.cleaned_data.get("notice_min")
+
+    if target_type == "channel":
+        notice, _ = NoticeScheduleChannel.objects.get_or_create(channel_id=target, notice_min=notice_min)
+    elif target_type == "stream":
+        notice, _ = NoticeScheduleStream.objects.get_or_create(stream_id=target, notice_min=notice_min)
+    else:
+        return JsonResponse({"status": False, "errors": ["Invalid target type."]})
+
+    if not notice:
+        return JsonResponse({"status": False})
+
+    if action == "add":
+        notice.users.add(request.user)
+    elif action == "remove":
+        notice.users.remove(request.user)
+    notice.save()
+
+    return JsonResponse({"status": True})

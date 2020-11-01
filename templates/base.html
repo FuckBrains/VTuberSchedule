@@ -1,4 +1,7 @@
 {% load static %}
+{% load webpush_notifications %}
+{% load webpush_head %}
+{% load webpush_switch %}
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -32,6 +35,12 @@
             integrity="sha384-3Nqiqht3ZZEO8FKj7GR1upiI385J92VwWNLj+FqHxtLYxd9l+WYpeqSOrLh0T12c"
             crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/darkmode-js@1.5.6/lib/darkmode-js.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/push.js/1.0.12/push.min.js"
+            integrity="sha512-DjIQO7OxE8rKQrBLpVCk60Zu0mcFfNx2nVduB96yk5HS/poYZAkYu5fxpwXj3iet91Ezqq2TNN6cJh9Y5NtfWg=="
+            crossorigin="anonymous"></script>
+    {% webpush_head_script %}
+    {% webpush_head_worker %}
+    {% webpush_head_vapid %}
 </head>
 <body class="d-flex flex-column">
 <div class="container-fluid" id="container">
@@ -51,6 +60,7 @@
                     <label for="switch_darkmode" class="custom-control-label">Darkmode</label>
                 </div>
                 {% if user.is_authenticated %}
+                    {% webpush_switch %}
                     <li class="nav-item"><a href="{% url 'web:user_detail' %}"
                                             class="user nav-link">{{ user.username }}</a></li>
                     <li class="nav-item"><a href="{% url 'logout' %}" class="logout nav-link">Logout</a></li>
@@ -80,6 +90,7 @@
         integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
         crossorigin="anonymous"></script>
 <script src="{% static "js/utils.js" %}"></script>
+<script src="{% static "js/modals.js" %}"></script>
 
 <script>
     const darkmode = new Darkmode();
@@ -89,5 +100,23 @@
         $("#switch_darkmode").prop("checked", false);
     }
 </script>
+{#{% if user.is_authenticated %}#}
+{#    {% webpush_button %}#}
+{#    <script>#}
+{#        const webpushButton = $("#webpush-subscribe-button")#}
+{##}
+{#        function notificationToggle() {#}
+{#            webpushButton.trigger("click")#}
+{#        }#}
+{#        console.log(isPushEnabled)#}
+{#        if (isPushEnabled) {#}
+{#            $("#webpush-subscribe-switch").prop("checked", true);#}
+{#        } else {#}
+{#            $("#webpush-subscribe-switch").prop("checked", false);#}
+{#        }#}
+{#        webpushButton.css("opacity", 0)#}
+{#        webpushButton.css("position", "absolute")#}
+{#    </script>#}
+{#{% endif %}#}
 </body>
 </html>

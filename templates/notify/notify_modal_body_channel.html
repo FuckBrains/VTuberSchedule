@@ -1,0 +1,22 @@
+{% load widget_tweaks %}
+<input type="hidden" value="{{ channel.channel_id }}" name="target_id">
+<div class="form-group">
+    <div class="input-group input-group-sm">
+        {{ forms.notice_min|add_class:"form-control form-control-sm"|append_attr:"aria-describedby=min_addon"|append_attr:"required" }}
+        <div class="input-group-append">
+            <small class="input-group-text" id="min_addon">分前に通知</small>
+        </div>
+    </div>
+</div>
+<div class="form-group">
+    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+        <label for="action_add" class="btn btn-sm btn-outline-dark">
+            <input id="action_add" type="radio" name="action" value="add" checked>
+            有効
+        </label>
+        <label for="action_remove" class="btn btn-sm btn-outline-dark">
+            <input id="action_remove" type="radio" name="action" value="remove">
+            無効
+        </label>
+    </div>
+</div>
