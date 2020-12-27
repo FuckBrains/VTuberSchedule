@@ -38,6 +38,19 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/push.js/1.0.12/push.min.js"
             integrity="sha512-DjIQO7OxE8rKQrBLpVCk60Zu0mcFfNx2nVduB96yk5HS/poYZAkYu5fxpwXj3iet91Ezqq2TNN6cJh9Y5NtfWg=="
             crossorigin="anonymous"></script>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-PLDM8X50N1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-PLDM8X50N1');
+    </script>
     {% webpush_head_script %}
     {% webpush_head_worker %}
     {% webpush_head_vapid %}
@@ -100,23 +113,5 @@
         $("#switch_darkmode").prop("checked", false);
     }
 </script>
-{#{% if user.is_authenticated %}#}
-{#    {% webpush_button %}#}
-{#    <script>#}
-{#        const webpushButton = $("#webpush-subscribe-button")#}
-{##}
-{#        function notificationToggle() {#}
-{#            webpushButton.trigger("click")#}
-{#        }#}
-{#        console.log(isPushEnabled)#}
-{#        if (isPushEnabled) {#}
-{#            $("#webpush-subscribe-switch").prop("checked", true);#}
-{#        } else {#}
-{#            $("#webpush-subscribe-switch").prop("checked", false);#}
-{#        }#}
-{#        webpushButton.css("opacity", 0)#}
-{#        webpushButton.css("position", "absolute")#}
-{#    </script>#}
-{#{% endif %}#}
 </body>
 </html>
