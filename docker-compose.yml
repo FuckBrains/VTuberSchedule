@@ -13,10 +13,15 @@ services:
       - "DJANGO_SECRET_KEY"
       - "DATABASE_ENGINE=django.db.backends.postgresql"
       - "DATABASE_DB=django_db"
-      - "DATABASE_HOST=postgres"
-      - "VIRTUAL_HOST=youtube.dplab.biz"
-      - "VIRTUAL_PORT=8000"
-      - "DJANGO_DEBUG=False"
+      - "DATABASE_HOST=vt_postgres"
+      - "DJANGO_DEBUG=True"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.youtube.rule=Host(`youtube.dplab.biz`)
+      - traefik.http.routers.youtube.entrypoints=https
+      - traefik.http.routers.youtube.tls=true
+      - traefik.http.routers.youtube.tls.certresolver=letsencrypt
+      - traefik.http.middlewares.redirect.redirectscheme.scheme=https
 
     volumes:
       - .:/code
@@ -25,7 +30,7 @@ services:
     expose:
       - 8000
     depends_on:
-      - postgres
+      - vt_postgres
 
   huey:
     build: .
@@ -37,19 +42,20 @@ services:
       - "DJANGO_SECRET_KEY"
       - "DATABASE_ENGINE=django.db.backends.postgresql"
       - "DATABASE_DB=django_db"
-      - "DATABASE_HOST=postgres"
+      - "DATABASE_HOST=vt_postgres"
       - "DATABASE_PORT=5432"
+      - "DJANGO_DEBUG=True"
 
     volumes:
       - .:/code
     depends_on:
-      - postgres
+      - vt_postgres
 
-  postgres:
+  vt_postgres:
     image: library/postgres:latest
 
     volumes:
-      - postgres_data:/var/lib/postgres/data
+      - ./postgres:/var/lib/postgres/data
     ports:
       - "5432:5432"
     env_file:
@@ -58,10 +64,8 @@ services:
       - "POSTGRES_DB=django_db"
 
 
-volumes:
-  postgres_data:
 
 networks:
   default:
     external:
-      name: projects_default
+      name: projects_traefik
