@@ -62,8 +62,6 @@ def get_upcoming_streams(_channel_id):
         elif Stream.objects.filter(video_id=[item["id"]]).exists():
             if Stream.objects.get(video_id=[item["id"]])[0].is_freechat:
                 video_list[item["id"]]["is_freechat"] = True
-        else:
-            video_list[item["id"]]["is_freechat"] = False
 
         video_list[item["id"]]["description"] = item["snippet"]["description"]
         video_list[item["id"]]["thumb"] = "http://img.youtube.com/vi/%s/mqdefault.jpg" % item["id"]
@@ -82,15 +80,20 @@ def get_upcoming_streams(_channel_id):
 
 @task()
 def get_streaming_videos(_channel_id):
+    start = time.time()
+    # print(f"[GETSTREAM] started. {time.time()-start}")
     # channel = get_object_or_404(Channel, channel_id=_channel_id)
 
     try:
         video_list = _get_streaming_videos(_channel_id)
     except ConnectionRefusedError:
         return -1
+
+    # print(f"[GETSTREAM] _get_streaming_videos done. {time.time()-start}")
     Live.objects.filter(channel_id=_channel_id, is_live=True).update(is_live=False)
     if not video_list:
         return 0
+    # print(f"[GETSTREAM] Live filter done. {time.time()-start}")
 
     for video_id, data in video_list.items():
         # = {"title": "", "channel_id": _channel_id: "", "thumb": ""}
@@ -102,6 +105,7 @@ def get_streaming_videos(_channel_id):
             logger.debug("Already added %s %s" % (live.video_id, live.title))
 
         # channel.live.add(live)
+    # print(f"[GETSTREAM] record update done. {time.time()-start}")
 
     return 0
 
@@ -126,10 +130,12 @@ def _get_upcoming_videos_id(_channel_id):
             raise ConnectionRefusedError
         _html_src = _res.text
 
-        if re.search(r"""window\["ytInitialData"\]""", _html_src):
+        if re.search(r"""window\["ytInitialData"\]|var ytInitialData""", _html_src):
             html = lxml.html.fromstring(_html_src)
-            data = json.loads(re.search("(.*);", html.xpath("""//body/script[contains(text(), '"ytInitialData"')]""")[
-                0].text.strip().replace("window[\"ytInitialData\"] = ", "")).groups()[0])
+            json_str = html.xpath("""//body/script[contains(text(), '"ytInitialData"') or
+             contains(text(), 'var ytInitialData')]""")[0].text.strip() \
+                .replace("window[\"ytInitialData\"] = ", "").replace("var ytInitialData = ", "")
+            data = json.loads(re.search("(.*);", json_str).groups()[0])
 
             videos = []
             videos_json = parse("$..gridVideoRenderer").find(data)
@@ -147,25 +153,29 @@ def _get_streaming_videos(_channel_id):
     save_json: if you want to save the data in json, enter filepath. [optional]\n
     save_html: if you want to save the response as html, enter filepath. [optional]\n"""
     url_base = "https://www.youtube.com/channel/%s/videos?view=2&live_view=501"
-
+    start = time.time()
+    # print(f"[GETSTREAM] _get_streaming_videos started. {time.time()-start}")
     _url = url_base % _channel_id
     try:
         _cookies = json.loads(ServerState.objects.get(key="cookies").value)
     except ServerState.DoesNotExist:
         _cookies = None
+    # print(f"[GETSTREAM] cookies loaded. {time.time()-start}")
     while True:
         _res = requests.get(_url, cookies=_cookies)
         if "/sorry/" in _res.url:
-            logger.warning(
+            logger.error(
                 "reCaptcha enabled. %s" % _res.url.replace("https://www.google.com/sorry/index?continue=", ""))
             raise ConnectionRefusedError
         _html_src = _res.text
         # print(_res.url)
-
-        if re.search(r"""window\["ytInitialData"\]""", _html_src):
+        videos = {}
+        if re.search(r"""window\["ytInitialData"\]|var ytInitialData""", _html_src):
             html = lxml.html.fromstring(_html_src)
-            data = json.loads(re.search("(.*);", html.xpath("""//body/script[contains(text(), '"ytInitialData"')]""")[
-                0].text.strip().replace("window[\"ytInitialData\"] = ", "")).groups()[0])
+            json_str = html.xpath("""//body/script[contains(text(), '"ytInitialData"') or
+             contains(text(), 'var ytInitialData')]""")[0].text.strip() \
+                .replace("window[\"ytInitialData\"] = ", "").replace("var ytInitialData = ", "")
+            data = json.loads(re.search("(.*);", json_str).groups()[0])
 
             videos_json = parse("$..gridVideoRenderer").find(data)
             # print(videos_json[0].value)
@@ -194,7 +204,15 @@ def _get_streaming_videos(_channel_id):
 
                     videos[video_id] = {"title": title, "thumb": thumb}
 
+            # print(f"[GETSTREAM] complete. {time.time() - start}")
+
             return videos
+
+        # print(f"[GETSTREAM] invalid page. {time.time() - start} {_res.url}")
+        import os
+        if not os.path.exists("invalid.html"):
+            with open("invalid.html", "w") as f:
+                f.write(_html_src)
 
         time.sleep(5)
 
