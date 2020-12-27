@@ -1,5 +1,6 @@
 {% extends 'base.html' %}
 {% load widget_tweaks %}
+{% load static %}
 
 {% block content %}
     <div class="container">
@@ -7,6 +8,9 @@
         <section class="common-form w-50 mx-auto">
             <form method="post">
                 {% csrf_token %}
+                {% if form.errors %}
+                    <span class="text-danger">{{ form.errors }}</span>
+                {% endif %}
                 <div class="form-group">
                     <label for="{{ form.username.id_for_label }}"
                            class="col-form-label col-form-label-sm py-0">{{ form.username.label }}</label>
@@ -16,6 +20,8 @@
                     <label for="{{ form.channel_id.id_for_label }}"
                            class="col-form-label col-form-label-sm py-0">{{ form.channel_id.label }}</label>
                     {{ form.channel_id|add_class:"form-control form-control-sm" }}
+                    <span class="small">Youtubeトップページ→右上のユーザーアイコン→チャンネルのURLから確認できます。</span>
+                    <a class="toggle-img small" data-toggle="modal" data-target="#img-modal" href="#">詳細</a>
                 </div>
                 <div class="form-group">
                     <label for="{{ form.nickname.id_for_label }}"
@@ -40,5 +46,14 @@
                 <button type="submit" class="btn btn-info mt-2">Sign up</button>
             </form>
         </section>
+    </div>
+    <div class="modal fade" id="img-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: 1000px">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <img src="{% static 'images/ChannelIdDesc.jpg' %}" class="img-fluid" alt="">
+                </div>
+            </div>
+        </div>
     </div>
 {% endblock %}

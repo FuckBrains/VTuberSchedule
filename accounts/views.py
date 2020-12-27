@@ -7,6 +7,8 @@ from django.core.exceptions import ValidationError
 from .models import CustomUser
 from scrape.getChannel import get_subbed_channel
 
+import requests
+
 
 class CustomForm(UserCreationForm):
     channel_id = CharField(required=True,
@@ -21,9 +23,12 @@ class CustomForm(UserCreationForm):
         fields = ("username", "channel_id", "nickname", "email", "password1", "password2")
 
     def save(self, commit=True):
+        cleaned_data = super(CustomForm, self).clean()
+        if self.errors:
+            return self.errors
         user = super(CustomForm, self).save(commit=False)
-        user.channel_id = self.cleaned_data["channel_id"]
-        user.nickname = self.cleaned_data["nickname"]
+        user.channel_id = cleaned_data["channel_id"]
+        user.nickname = cleaned_data["nickname"]
         if commit:
             user.save()
         return user
@@ -32,6 +37,9 @@ class CustomForm(UserCreationForm):
         if CustomUser.objects.filter(channel_id=self.cleaned_data["channel_id"]):
             raise ValidationError(self.fields["channel_id"].error_messages["exist"])
         if len(self.cleaned_data["channel_id"]) > 24:
+            raise ValidationError(self.fields["channel_id"].error_messages["invalid"])
+        res = requests.get(f"https://www.youtube.com/channel/{self.fields['channel_id']}")
+        if not res.status_code == 200:
             raise ValidationError(self.fields["channel_id"].error_messages["invalid"])
         return self.cleaned_data["channel_id"]
 
