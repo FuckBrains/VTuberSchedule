@@ -1,4 +1,4 @@
-<div class="card m-1 px-1 pt-1 pb-0 border-{% if type == "live" %}danger{% else %}dark{% endif %}">
+<div class="card m-1 px-1 pt-1 pb-0 border-{% if type == "live" %}danger{% else %}dark{% endif %} {% if s in notice_list %}border-notice{% endif %}">
     <div>
         <a href="https://www.youtube.com/watch?v={{ s.video_id }}" target="_blank">
             <img class="bd-placeholder-img card-img-top" src="{{ s.thumb }}" alt="">

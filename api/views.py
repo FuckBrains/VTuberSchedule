@@ -11,7 +11,7 @@ from notify.forms import NoticeForm
 
 from scrape.getChannel import get_subbed_channel
 from scrape.getStream import get_upcoming_streams, get_streaming_videos
-from web.utils import get_streams
+from web.utils import get_streams, get_notice_stream_list
 
 import json
 
@@ -144,14 +144,16 @@ def remove_stream(request):
 def refresh(request):
     user = get_object_or_404(CustomUser, username=request.user.username)
     live_list, upc_list, freechat_list = get_streams(user)
+    notice_list = get_notice_stream_list(user, upc_list)
 
     return HttpResponse(render_to_string("web/main.html", {"live_list": live_list, "stream_list": upc_list,
-                                                           "freechat_list": freechat_list, "user": request.user}))
+                                                           "freechat_list": freechat_list, "user": request.user,
+                                                           "notice_list": notice_list}))
 
 
 @require_GET
 @login_required
-def notify(request):
+def notify(request) -> JsonResponse:
     form = NoticeForm(request.GET)
     if not form.is_valid():
         return JsonResponse({"status": False, "errors": form.errors, "msg": "form error"})

@@ -59,6 +59,11 @@ footer {
     flex-shrink: unset;
 }
 
+/* Card */
+.border-notice {
+    border-color: #00b4ff !important;
+}
+
 
 /* Darkmode */
 .darkmode--activated .container-fluid {
@@ -115,6 +120,10 @@ footer {
     border-color: #b6b6b6 !important;
 }
 
+.darkmode--activated .border-notice {
+    border-color: #00b4ff !important;
+}
+
 .darkmode--activated th, .darkmode--activated td, .darkmode--activated table {
     border-color: #b6b6b6 !important;
 }
@@ -126,4 +135,8 @@ footer {
 
 .darkmode--activated .btn-secondary {
     background-color: #868686;
+}
+
+.darkmode--activated p {
+    color: #e0e0e0;
 }

@@ -13,7 +13,8 @@ def get_streams(user):
 
     # Upcoming Streams
     _stream_list = Stream.objects.filter(channel_id__in=channel_id_set, is_freechat=False, is_removed=False,
-                                         start_at__gte=timezone.now()-timezone.timedelta(hours=1)).order_by("start_at")
+                                         start_at__gte=timezone.now() - timezone.timedelta(hours=1)).order_by(
+        "start_at")
 
     upc_stream_list = []
     if _stream_list:
@@ -28,3 +29,17 @@ def get_streams(user):
     live_list = Live.objects.filter(is_live=True).order_by("channel_id")
 
     return live_list, upc_stream_list, freechat_list
+
+
+def get_notice_stream_list(user, upc_list):
+    s = set()
+
+    channels = user.notice_schedule_channels.values_list("channel", flat=True)
+    streams = user.notice_schedule_streams.filter(
+        stream__start_at__gte=timezone.now() - timezone.timedelta(hours=1)).values_list("stream", flat=True)
+    for d in upc_list:
+        for stream in d[1]:
+            print(f"{stream} {stream.channel}")
+            if stream.channel.channel_id in channels or stream.video_id in streams:
+                s.add(stream)
+    return s

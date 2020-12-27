@@ -13,7 +13,7 @@ from accounts.models import CustomUser
 from web.models import Channel, Stream, Live, ServerState
 from .forms import UserUpdateForm
 from scrape.utils import group_datetime, verify_recaptcha
-from web.utils import get_streams
+from web.utils import get_streams, get_notice_stream_list
 
 
 def index(request):
@@ -23,9 +23,10 @@ def index(request):
     user = get_object_or_404(CustomUser, username=request.user.username)
 
     live_list, upc_list, freechat_list = get_streams(user)
+    notice_list = get_notice_stream_list(user, upc_list)
 
     return render(request, "web/index.html",
-                  {"stream_list": upc_list, "live_list": live_list, "freechat_list": freechat_list})
+                  {"stream_list": upc_list, "live_list": live_list, "freechat_list": freechat_list, "notice_list": notice_list})
 
 
 @login_required

@@ -17,7 +17,7 @@
             {% for stream in streams %}
                 <div class="col-xl-2 px-0 d-flex align-items-stretch yt-item yt-upcoming" style="max-width: 16rem"
                      id="upcoming_item_{{ forloop.parentloop.counter }}_{{ forloop.counter }}">
-                    {% include "web/card.html" with s=stream i=forloop.parentloop.counter j=forloop.counter type="upcoming" user=user %}
+                    {% include "web/card.html" with s=stream i=forloop.parentloop.counter j=forloop.counter type="upcoming" user=user notice_list=notice_list %}
                 </div>
             {% endfor %}
         </div>
