@@ -1,18 +1,94 @@
-import requests
-import re
 import json
-import lxml.html
-from jsonpath_ng import parse
+import re
 import time
-
-from django.shortcuts import get_object_or_404
-from django.conf import settings
-from huey.contrib.djhuey import task
-from web.models import Stream, Channel, Live, ServerState
-
 from logging import getLogger
 
+import lxml.html
+import requests
+from dataclasses import dataclass
+from django.conf import settings
+from django.shortcuts import get_object_or_404
+from huey.contrib.djhuey import task
+from jsonpath_ng import parse
+
+from web.models import Stream, Channel, Live, ServerState
+
 logger = getLogger(__name__)
+
+
+@dataclass
+class StreamData:
+    video_id: str
+    channel_id: str
+    title: str
+    description: str
+    start_at: int
+    is_freechat: bool
+
+
+def _get_upcoming_streams_data(_channel_id):
+    url_base = "https://www.youtube.com/channel/%s/videos?view=2&live_view=502"
+
+    _url = url_base % _channel_id
+    try:
+        _cookies = json.loads(ServerState.objects.get(key="cookies").value)
+    except ServerState.DoesNotExist:
+        _cookies = None
+
+    while True:
+        _res = requests.get(_url, cookies=_cookies)
+        if "/sorry/" in _res.url:
+            logger.warning(
+                "reCaptcha enabled. %s" % _res.url.replace("https://www.google.com/sorry/index?continue=", ""))
+            raise ConnectionRefusedError
+        _html_src = _res.text
+
+        if re.search(r"""window\["ytInitialData"]|var ytInitialData""", _html_src):
+            html = lxml.html.fromstring(_html_src)
+            json_str = html.xpath("""//body/script[contains(text(), '"ytInitialData"') or
+             contains(text(), 'var ytInitialData')]""")[0].text.strip() \
+                .replace("window[\"ytInitialData\"] = ", "").replace("var ytInitialData = ", "")
+            data = json.loads(re.search("(.*);", json_str).groups()[0])
+
+            videos_json = parse("$..gridVideoRenderer").find(data)
+            videos = []
+            if not _check_has_upcoming_stream(videos_json):
+                return []
+
+            for video in videos_json:
+                videos.append(
+                    StreamData(
+                        video_id=video.value["videoId"],
+                        channel_id=_channel_id,
+                        title=video.value["title"]["runs"][0]["text"],
+                        description=_get_stream_description(video_id=video.value["videoId"]),
+                        start_at=int(video.value["upcomingEventData"]["startTime"]),
+                        is_freechat=_is_freechat(video.value["title"]["runs"][0]["text"])
+                    )
+                )
+
+            return videos
+
+
+def _get_stream_description(video_id):
+    url = f"https://www.youtube.com/watch?v={video_id}"
+
+    try:
+        _cookies = json.loads(ServerState.objects.get(key="cookies").value)
+    except ServerState.DoesNotExist:
+        _cookies = None
+    res = requests.get(url, cookies=_cookies)
+    if "/sorry/" in res.url:
+        logger.warning(
+            "reCaptcha enabled. %s" % res.url.replace("https://www.google.com/sorry/index?continue=", ""))
+        raise ConnectionRefusedError
+
+    html_src = res.text
+    r = re.search('"description":{"simpleText":"(.+?)"}', html_src)
+    if not r:
+        logger.error(f"can not find description {video_id}")
+        return ""
+    return r.group(1)
 
 
 @task()
@@ -33,45 +109,24 @@ def get_upcoming_streams(_channel_id):
     # Get upcoming video ids
     video_list = {}
     try:
-        id_list = _get_upcoming_videos_id(_channel_id)
+        # id_list = _get_upcoming_videos_id(_channel_id)
+        stream_list = _get_upcoming_streams_data(_channel_id)
     except ConnectionRefusedError:
         return -1
-    if not id_list:
+    if not video_list:
         return 0  # Error: False
 
-    for item in id_list:
-        # = {"title": "", "description": "", "channel_id": _channel_id, "thumb": "", "start_at": ""}
-        video_list[item] = {"channel_id": _channel_id}
-
-    # Get Start time
-    error, items = _get_start_at(video_list, video_api_url, api_key)
-    if error:
-        return 1
-
-    for item in items:
-        video_list[item["id"]]["start_at"] = item["liveStreamingDetails"]["scheduledStartTime"]
-
-    # Get more video details
-    error, items = _get_snippet(video_list, video_api_url, api_key)
-    if error:
-        return 1
-    for item in items:
-        video_list[item["id"]]["title"] = item["snippet"]["title"]
-        if _is_freechat(video_list[item["id"]]["title"]):
-            video_list[item["id"]]["is_freechat"] = True
-        elif Stream.objects.filter(video_id=[item["id"]]).exists():
-            if Stream.objects.get(video_id=[item["id"]])[0].is_freechat:
-                video_list[item["id"]]["is_freechat"] = True
-
-        video_list[item["id"]]["description"] = item["snippet"]["description"]
-        video_list[item["id"]]["thumb"] = "http://img.youtube.com/vi/%s/mqdefault.jpg" % item["id"]
-
-    for k, v in video_list.items():
-        stream, _ = Stream.objects.update_or_create(video_id=k, defaults=v)
-
+    for stream_data in stream_list:
+        stream, _ = Stream.objects.update_or_create(video_id=stream_data.video_id, defaults={
+            "video_id": stream_data.video_id,
+            "channel_id": stream_data.channel_id,
+            "title": stream_data.title,
+            "description": stream_data.description,
+            "start_at": stream_data.start_at,
+            "is_freechat": stream_data.is_freechat
+        })
         if _:
             logger.debug("Added %s %s" % (stream.video_id, stream.title))
-
         channel.stream.add(stream)
 
     logger.debug("Done. %s" % channel.channel_id)
@@ -80,7 +135,7 @@ def get_upcoming_streams(_channel_id):
 
 @task()
 def get_streaming_videos(_channel_id):
-    start = time.time()
+    # start = time.time()
     # print(f"[GETSTREAM] started. {time.time()-start}")
     # channel = get_object_or_404(Channel, channel_id=_channel_id)
 
@@ -110,50 +165,12 @@ def get_streaming_videos(_channel_id):
     return 0
 
 
-def _get_upcoming_videos_id(_channel_id):
-    """channel_id: Channel id you want to get\n
-    save_json: if you want to save the data in json, enter filepath. [optional]\n
-    save_html: if you want to save the response as html, enter filepath. [optional]\n"""
-    url_base = "https://www.youtube.com/channel/%s/videos?view=2&live_view=502"
-
-    _url = url_base % _channel_id
-    try:
-        _cookies = json.loads(ServerState.objects.get(key="cookies").value)
-    except ServerState.DoesNotExist:
-        _cookies = None
-
-    while True:
-        _res = requests.get(_url, cookies=_cookies)
-        if "/sorry/" in _res.url:
-            logger.warning(
-                "reCaptcha enabled. %s" % _res.url.replace("https://www.google.com/sorry/index?continue=", ""))
-            raise ConnectionRefusedError
-        _html_src = _res.text
-
-        if re.search(r"""window\["ytInitialData"\]|var ytInitialData""", _html_src):
-            html = lxml.html.fromstring(_html_src)
-            json_str = html.xpath("""//body/script[contains(text(), '"ytInitialData"') or
-             contains(text(), 'var ytInitialData')]""")[0].text.strip() \
-                .replace("window[\"ytInitialData\"] = ", "").replace("var ytInitialData = ", "")
-            data = json.loads(re.search("(.*);", json_str).groups()[0])
-
-            videos = []
-            videos_json = parse("$..gridVideoRenderer").find(data)
-            if not _check_has_upcoming_stream(videos_json):
-                return []
-
-            for video in videos_json:
-                videos.append(video.value["videoId"])
-
-            return videos
-
-
 def _get_streaming_videos(_channel_id):
     """channel_id: Channel id you want to get\n
     save_json: if you want to save the data in json, enter filepath. [optional]\n
     save_html: if you want to save the response as html, enter filepath. [optional]\n"""
     url_base = "https://www.youtube.com/channel/%s/videos?view=2&live_view=501"
-    start = time.time()
+    # start = time.time()
     # print(f"[GETSTREAM] _get_streaming_videos started. {time.time()-start}")
     _url = url_base % _channel_id
     try:
@@ -168,9 +185,7 @@ def _get_streaming_videos(_channel_id):
                 "reCaptcha enabled. %s" % _res.url.replace("https://www.google.com/sorry/index?continue=", ""))
             raise ConnectionRefusedError
         _html_src = _res.text
-        # print(_res.url)
-        videos = {}
-        if re.search(r"""window\["ytInitialData"\]|var ytInitialData""", _html_src):
+        if re.search(r"""window\["ytInitialData"]|var ytInitialData""", _html_src):
             html = lxml.html.fromstring(_html_src)
             json_str = html.xpath("""//body/script[contains(text(), '"ytInitialData"') or
              contains(text(), 'var ytInitialData')]""")[0].text.strip() \
@@ -178,7 +193,6 @@ def _get_streaming_videos(_channel_id):
             data = json.loads(re.search("(.*);", json_str).groups()[0])
 
             videos_json = parse("$..gridVideoRenderer").find(data)
-            # print(videos_json[0].value)
 
             videos = {}
             for video in videos_json:
@@ -217,26 +231,6 @@ def _get_streaming_videos(_channel_id):
         time.sleep(5)
 
 
-def _get_start_at(_video_list, _video_api_url, _api_key):
-    res = requests.get(_video_api_url,
-                       params={"part": "liveStreamingDetails", "id": ",".join(list(_video_list.keys())),
-                               "maxResults": 50, "key": _api_key})
-    live_data = res.json()
-    if live_data.get("error"):
-        return True, (live_data["error"]["code"], live_data["error"]["message"])
-    return False, live_data["items"]
-
-
-def _get_snippet(_video_list, _video_api_url, _api_key):
-    res = requests.get(_video_api_url,
-                       params={"part": "snippet", "id": ",".join(list(_video_list.keys())),
-                               "maxResults": 50, "key": _api_key})
-    snippet_data = res.json()
-    if snippet_data.get("error"):
-        return True, (snippet_data["error"]["code"], snippet_data["error"]["message"])
-    return False, snippet_data["items"]
-
-
 def _check_has_upcoming_stream(video_dict):
     try:
         video_dict[0].value["upcomingEventData"]
@@ -253,12 +247,3 @@ def _is_freechat(title):
         return True
     else:
         return False
-
-
-if __name__ == '__main__':
-    channel_id = "UCdpUojq0KWZCN9bxXnZwz5w"
-
-    d = _get_streaming_videos(channel_id)
-    from pprint import pprint
-
-    pprint(d)
