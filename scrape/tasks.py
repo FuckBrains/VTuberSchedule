@@ -1,14 +1,12 @@
-from huey import crontab
-from huey.contrib.djhuey import periodic_task
+import logging
 import time
 
-# from django.shortcuts import get_list_or_404
-from django.conf import settings
-from web.models import Channel
+from huey import crontab
+from huey.contrib.djhuey import periodic_task
 
 from scrape.getStream import get_upcoming_streams, get_streaming_videos
-
-import logging
+# from django.shortcuts import get_list_or_404
+from web.models import Channel
 
 logger = logging.getLogger(__name__)
 
@@ -32,15 +30,5 @@ def get_live_stream():
 
 
 def run_command(func, channel_list):
-    workers = settings.HUEY.get("con"
-                                "sumer", {}).get("workers", 1)
-    for i in range(0, len(channel_list), workers):
-        for j, channel in enumerate(channel_list[i:i + workers]):
-            r = func(channel.channel_id)
-            if j == workers:
-                if r(blocking=True) == -1:
-                    return
-            elif i + j >= len(channel_list) - 1:
-                r(blocking=True)
-            else:
-                r()
+    for channel in channel_list:
+        func(channel.channel_id)
