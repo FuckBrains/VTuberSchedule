@@ -4,7 +4,7 @@ from django.db import models
 class Stream(models.Model):
     video_id = models.CharField(max_length=11, primary_key=True)
     title = models.CharField(max_length=100)
-    description = models.CharField(max_length=5000, blank=True)
+    description = models.CharField(max_length=5500, blank=True)
     thumb = models.CharField(max_length=120)
     channel = models.ForeignKey("Channel", on_delete=models.CASCADE, related_name="stream")
     start_at = models.DateTimeField()

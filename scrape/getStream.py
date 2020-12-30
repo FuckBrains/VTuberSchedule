@@ -1,13 +1,14 @@
 import json
 import re
 import time
+from dataclasses import dataclass
 from logging import getLogger
 
 import lxml.html
 import requests
-from dataclasses import dataclass
 from django.conf import settings
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from huey.contrib.djhuey import task
 from jsonpath_ng import parse
 
@@ -22,8 +23,12 @@ class StreamData:
     channel_id: str
     title: str
     description: str
-    start_at: int
+    start_at: timezone.datetime
     is_freechat: bool
+
+    def __post_init__(self):
+        self.start_at = timezone.make_aware(self.start_at,
+                                            timezone.pytz.timezone(settings.TIME_ZONE))
 
 
 def _get_upcoming_streams_data(_channel_id):
@@ -56,16 +61,28 @@ def _get_upcoming_streams_data(_channel_id):
                 return []
 
             for video in videos_json:
-                videos.append(
-                    StreamData(
-                        video_id=video.value["videoId"],
-                        channel_id=_channel_id,
-                        title=video.value["title"]["runs"][0]["text"],
-                        description=_get_stream_description(video_id=video.value["videoId"]),
-                        start_at=int(video.value["upcomingEventData"]["startTime"]),
-                        is_freechat=_is_freechat(video.value["title"]["runs"][0]["text"])
+                # if got ended streams,
+                try:
+                    _ = video.value["upcomingEventData"]["startTime"]
+                except KeyError:
+                    break
+
+                try:
+                    videos.append(
+                        StreamData(
+                            video_id=video.value["videoId"],
+                            channel_id=_channel_id,
+                            title=video.value["title"]["runs"][0]["text"],
+                            description=_get_stream_description(video_id=video.value["videoId"]),
+                            start_at=timezone.datetime.fromtimestamp(
+                                int(video.value["upcomingEventData"]["startTime"])),
+                            is_freechat=_is_freechat(video.value["title"]["runs"][0]["text"])
+                        )
                     )
-                )
+                except Exception as e:
+                    print(video.value)
+                    logger.error(video.value)
+                    raise e
 
             return videos
 
@@ -106,28 +123,30 @@ def get_upcoming_streams(_channel_id):
 
     channel = get_object_or_404(Channel, channel_id=_channel_id)
 
-    # Get upcoming video ids
-    video_list = {}
     try:
-        # id_list = _get_upcoming_videos_id(_channel_id)
         stream_list = _get_upcoming_streams_data(_channel_id)
     except ConnectionRefusedError:
         return -1
-    if not video_list:
-        return 0  # Error: False
 
     for stream_data in stream_list:
-        stream, _ = Stream.objects.update_or_create(video_id=stream_data.video_id, defaults={
-            "video_id": stream_data.video_id,
-            "channel_id": stream_data.channel_id,
-            "title": stream_data.title,
-            "description": stream_data.description,
-            "start_at": stream_data.start_at,
-            "is_freechat": stream_data.is_freechat
-        })
-        if _:
-            logger.debug("Added %s %s" % (stream.video_id, stream.title))
-        channel.stream.add(stream)
+        try:
+            stream, _ = Stream.objects.update_or_create(video_id=stream_data.video_id, defaults={
+                "channel_id": stream_data.channel_id,
+                "title": stream_data.title,
+                "description": stream_data.description,
+                "start_at": stream_data.start_at,
+                "is_freechat": stream_data.is_freechat,
+                "thumb": f'https://i.ytimg.com/vi/{stream_data.video_id}/mqdefault.jpg'
+            })
+            if _:
+                logger.debug("Added %s %s" % (stream.video_id, stream.title))
+            channel.stream.add(stream)
+        except Exception as e:
+            print(
+                f"{channel.title}, {stream_data.video_id}, {len(stream_data.description)} chars\n{stream_data.description[:100]}")
+            logger.error(
+                f"{channel.title}, {stream_data.video_id}, {len(stream_data.description)} chars\n{stream_data.description[:100]}")
+            raise e
 
     logger.debug("Done. %s" % channel.channel_id)
     return 0
