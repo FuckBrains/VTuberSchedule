@@ -31,6 +31,8 @@ services:
       - 8000
     depends_on:
       - vt_postgres
+    restart:
+      - always
 
   huey:
     build: .
