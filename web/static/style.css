@@ -66,6 +66,9 @@ footer {
 
 
 /* Darkmode */
+.darkmode--activated{
+    color: #4e4e4e;
+}
 .darkmode--activated .container-fluid {
     background-color: #d5d5d5;
 }
