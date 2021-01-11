@@ -1,7 +1,7 @@
 from django.shortcuts import render, HttpResponse, get_object_or_404
 from django.http import HttpResponseBadRequest, JsonResponse
 from django.contrib.auth.decorators import login_required
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_GET, require_POST
 from django.template.loader import render_to_string
 
 from accounts.models import CustomUser
@@ -84,16 +84,20 @@ def get_live(request, channel_id):
     return JsonResponse({"error": False, "data": stream_list})
 
 
-@require_GET
+@require_POST
 @login_required
-def get_sub_channel(request):
-    if request.method != "GET":
-        return HttpResponseBadRequest
-
+def register_sub_channel(request):
     user = get_object_or_404(CustomUser, username=request.user.username)
-    error, channel_list = get_subbed_channel(user.channel_id)
-    if error:
-        return JsonResponse({"error": error, "code": channel_list[0], "message": channel_list[1]})
+    channel_list = json.loads(request.POST.get("channelList"))
+    for channel in channel_list:
+        c, _ = Channel.objects.update_or_create(channel_id=channel["channel_id"],
+                                                defaults={"title": channel["title"], "thumb": channel["thumb"],
+                                                          "description": channel["desc"]})
+        if _:
+            logger.info("Added %s %s" % (c.title, c.channel_id))
+        user.channel.add(c)
+
+    logger.debug("%d件の登録チャンネルを取得しました。" % len(channel_list))
     return JsonResponse({"error": False})
 
 
@@ -180,3 +184,9 @@ def notify(request) -> JsonResponse:
     notice.save()
 
     return JsonResponse({"status": True})
+
+
+@require_GET
+@login_required
+def youtube_callback(request):
+    return render(request, "api/youtube_callback.html")

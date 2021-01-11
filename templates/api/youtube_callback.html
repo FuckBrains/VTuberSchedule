@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% load static %}
+{% block head_script %}
+    <script src="{% static "js/subscription.js" %}"></script>
+{% endblock %}
+{% block content %}
+    <p>redirecting ... </p>
+    <script>
+        if (Object.keys(params).length > 0) {
+            localStorage.setItem('yt-params', JSON.stringify(params));
+            if (params['state'] && params['state'] === '1') {
+                getSubscriptions('{% url "web:user_detail" %}');
+            }
+        }
+    </script>
+{% endblock %}
